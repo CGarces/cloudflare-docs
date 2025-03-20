@@ -2,6 +2,7 @@
 
 interface Env {
 	ASSETS: Fetcher;
+	MARKDOWN: R2Bucket;
 }
 declare module "*/_redirects" {
 	const value: string;

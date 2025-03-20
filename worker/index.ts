@@ -5,11 +5,26 @@ import redirectsFileContents from "../dist/_redirects";
 const redirectsEvaluator = generateRedirectsEvaluator(redirectsFileContents);
 
 export default class extends WorkerEntrypoint<Env> {
-	override async fetch(request: Request) {
+	override async fetch(request: Request, env: Env) {
+		const url = new URL(request.url);
+		if (request.url.endsWith("index.md")) {
+			const path = url.pathname.slice(1) + "index.md";
+			const file = await env.MARKDOWN.get(path);
+
+			if (file) {
+				return new Response(file.body, {
+					headers: {
+						"content-type": "text/markdown",
+					},
+				});
+			}
+
+			return new Response("Not Found", { status: 404 });
+		}
+
 		try {
 			try {
 				// Remove once the whacky double-slash rules get removed
-				const url = new URL(request.url);
 				request = new Request(
 					new URL(
 						url.pathname.replaceAll("//", "/") + url.search,
